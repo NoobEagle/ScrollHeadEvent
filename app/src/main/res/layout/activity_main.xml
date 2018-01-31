@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="github.eagleweb.xyz.scrollscaledemo.MainActivity">
+
+    <github.eagleweb.xyz.scrollscaledemo.MyIndexView
+        android:id="@+id/id_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/home_background"
+        app:leftMenuPaddingRight="80dp"
+        app:rightMenuPaddingLeft="260dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <include layout="@layout/left_menu"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/qq">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:onClick="toggleLeftMenu"
+                    android:text="切换左侧菜单"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:onClick="toggleRightMenu"
+                    android:text="切换右侧菜单"/>
+            </RelativeLayout>
+
+            <include layout="@layout/right_menu"/>
+        </LinearLayout>
+    </github.eagleweb.xyz.scrollscaledemo.MyIndexView>
+
+</android.support.constraint.ConstraintLayout>
