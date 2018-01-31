@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
         rlTop.setBootomView(rlBottom);
         rlBottom.setTopView(rlTop);
         rlBottom.setListManager(layout);

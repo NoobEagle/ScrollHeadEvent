@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -17,19 +18,20 @@ import com.nineoldandroids.animation.ValueAnimator;
 public class BottomView extends RelativeLayout {
 
     private final String TAG = "BottomView";
-    private float               mDownY;
-    private float               mMoveY;
-    private float               mDownX;
-    private float               mMoveX;
-    private long                mDownTime;
-    private int                 mMeasuredHeight;
-    private float               mUpY;
-    private float               sourceHeight;
-    private ValueAnimator       mHideAnimator;
-    private ValueAnimator       mShowAnimator;
-    private TopView             mTopView;
-    private int                 mTopViewHeight;
-    private LinearLayoutManager mLinearLayoutManager;
+    private final int                 mTouchSlop;
+    private       float               mDownY;
+    private       float               mMoveY;
+    private       float               mDownX;
+    private       float               mMoveX;
+    private       long                mDownTime;
+    private       int                 mMeasuredHeight;
+    private       float               mUpY;
+    private       float               sourceHeight;
+    private       ValueAnimator       mHideAnimator;
+    private       ValueAnimator       mShowAnimator;
+    private       TopView             mTopView;
+    private       int                 mTopViewHeight;
+    private       LinearLayoutManager mLinearLayoutManager;
     private int mDuration = 100;
     private RecyclerView mListView;
 
@@ -43,6 +45,7 @@ public class BottomView extends RelativeLayout {
 
     public BottomView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
     public void setTopView(TopView topView) {
@@ -54,7 +57,7 @@ public class BottomView extends RelativeLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mLinearLayoutManager.findFirstVisibleItemPosition() != 0) {
-            return mListView.onTouchEvent(event);
+            return true;
         }
         sourceHeight = mTopView.getResources().getDimension(R.dimen.top_height);
         switch (event.getAction()) {
@@ -101,7 +104,7 @@ public class BottomView extends RelativeLayout {
                 }
 
                 // 如果滑动距离不超过50，时间不超过800ms。则视为点击
-                if (Math.abs(translationY) < 50 && Math.abs(mMoveX - mDownX) < 50 && (System.currentTimeMillis() - mDownTime) < 800) {
+                if (Math.abs(translationY) < 3 && Math.abs(mMoveX - mDownX) < 3 && (System.currentTimeMillis() - mDownTime) < 800) {
                     return mListView.onTouchEvent(event);
                 }
 
@@ -109,9 +112,14 @@ public class BottomView extends RelativeLayout {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 //                if (mTopView.isOpen()) {
+                // 如果滑动距离不超过50，时间不超过800ms。则视为点击
                 // 菜单打开状态
+
                 mUpY = event.getRawY();
                 float translationY2 = mUpY - mDownY;
+                if (Math.abs(translationY2) < 3 && Math.abs(mMoveX - mDownX) < 3 && (System.currentTimeMillis() - mDownTime) < 500) {
+                    return mListView.onTouchEvent(event);
+                }
                 Log.d(TAG, "up/cancel " + mMeasuredHeight + "  mUpY：" + mUpY);
                 long l = System.currentTimeMillis() - mDownTime;
                 // 如果Y差值大于100，并且时间小于800，则视为快速滑动，直接给他收起
@@ -185,14 +193,42 @@ public class BottomView extends RelativeLayout {
     private float mY;
     private long  dTime;
 
+    //    @Override
+    //    public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
+    //        mListView.dispatchNestedFling(velocityX, velocityY, consumed);
+    //        return super.dispatchNestedFling(velocityX, velocityY, consumed);
+    //    }
+    //
+    //    @Override
+    //    public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
+    //        mListView.dispatchNestedPreFling(velocityX, velocityY);
+    //        return super.dispatchNestedPreFling(velocityX, velocityY);
+    //    }
+    //
+    //    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    //    @Override
+    //    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+    //        mListView.onNestedFling(target, velocityX, velocityY, consumed);
+    //        return super.onNestedFling(target, velocityX, velocityY, consumed);
+    //    }
+    //
+    //    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    //    @Override
+    //    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+    //        mListView.onNestedPreFling(target, velocityX, velocityY);
+    //        return super.onNestedPreFling(target, velocityX, velocityY);
+    //    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (mLinearLayoutManager.findFirstVisibleItemPosition() != 0) {
-            return true;
+            return mListView.onInterceptTouchEvent(ev);
         } else {
-            if (true)
-                return true;
+//            if (true) {
+//                return true;
+//            }
         }
+        mListView.onInterceptTouchEvent(ev);
         // 判断如果是点击 也返回false
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -205,12 +241,12 @@ public class BottomView extends RelativeLayout {
                 if (mY - dY > 0) {
                     // 下滑
                     if (mTopView.isOpen()) {
-                        return false;
+                        //                        return mListView.onInterceptTouchEvent(ev);
                     }
                 } else {
                     // 上滑
                     if (!mTopView.isOpen()) {
-                        return false;
+                        //                        return mListView.onInterceptTouchEvent(ev);
                     }
                 }
                 break;
@@ -220,44 +256,50 @@ public class BottomView extends RelativeLayout {
                 float y = getY();
                 if (Math.abs(y - dY) < 10 && Math.abs(x - dX) < 10 && (System.currentTimeMillis() - dTime) < 300) {
                     // 判断是点击，不拦截
-                    return super.onInterceptTouchEvent(ev);
+                    //                    return mListView.onInterceptTouchEvent(ev);
                 }
                 break;
             default:
                 break;
         }
+        //        VelocityTracker obtain = VelocityTracker.obtain();
+        //        obtain.addMovement(ev);
+        //        float xVelocity = obtain.getXVelocity();
+        //        float yVelocity = obtain.getYVelocity();
+        //        mListView.fling((int) xVelocity, (int) yVelocity);
         return true;
     }
 
     //
-    //    @Override
-    //    public boolean dispatchTouchEvent(MotionEvent ev) {
-    //        if (mLinearLayoutManager.findFirstVisibleItemPosition() != 0) {
-    //            return super.dispatchTouchEvent(ev);
-    //        }
-    //        // 判断如果是点击 也返回false
-    //        switch (ev.getAction()) {
-    //            case MotionEvent.ACTION_DOWN:
-    //                dX = ev.getX();
-    //                dY = ev.getY();
-    //                dTime = System.currentTimeMillis();
-    //                break;
-    //            case MotionEvent.ACTION_MOVE:
-    //                break;
-    //            case MotionEvent.ACTION_UP:
-    //            case MotionEvent.ACTION_CANCEL:
-    //                float x = getX();
-    //                float y = getY();
-    //                if (Math.abs(y - dY) < 10 && Math.abs(x - dX) < 10 && (System.currentTimeMillis() - dTime) < 300) {
-    //                    // 判断是点击，不拦截
-    //                    return true;
-    //                }
-    //                break;
-    //            default:
-    //                break;
-    //        }
-    //        return super.dispatchTouchEvent(ev);
-    //    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        //        if (mLinearLayoutManager.findFirstVisibleItemPosition() != 0) {
+        //            return super.dispatchTouchEvent(ev);
+        //        }
+        //        // 判断如果是点击 也返回false
+        //        switch (ev.getAction()) {
+        //            case MotionEvent.ACTION_DOWN:
+        //                dX = ev.getX();
+        //                dY = ev.getY();
+        //                dTime = System.currentTimeMillis();
+        //                break;
+        //            case MotionEvent.ACTION_MOVE:
+        //                break;
+        //            case MotionEvent.ACTION_UP:
+        //            case MotionEvent.ACTION_CANCEL:
+        //                float x = getX();
+        //                float y = getY();
+        //                if (Math.abs(y - dY) < 10 && Math.abs(x - dX) < 10 && (System.currentTimeMillis() - dTime) < 300) {
+        //                    // 判断是点击，不拦截
+        //                    return true;
+        //                }
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        mListView.dispatchTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
+    }
 
     public void setListManager(LinearLayoutManager linearLayoutManager) {
         mLinearLayoutManager = linearLayoutManager;
