@@ -10,15 +10,52 @@
     <github.eagleweb.xyz.scrollscaledemo.TopView
         android:id="@+id/rl_top"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_height"
+        android:layout_height="@dimen/index_top_height"
         android:background="@color/colorPrimaryDark">
 
-        <ImageView
-            android:id="@+id/iv_top"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:src="@mipmap/ic_launcher_round"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="visible"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:id="@+id/iv_top"
+                android:layout_width="67dp"
+                android:layout_height="67dp"
+                android:layout_centerHorizontal="true"
+                android:src="@mipmap/ic_launcher"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="6.7亿人在玩"
+                android:textColor="#ddffffff"
+                android:textSize="10sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="233小游戏"
+                android:textColor="#ffffff"
+                android:textSize="15sp"/>
+
+            <Button
+                android:id="@+id/btn_start_recommend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/ic_launcher_background"
+                android:text="开始游戏"/>
+
+        </LinearLayout>
+
     </github.eagleweb.xyz.scrollscaledemo.TopView>
 
     <github.eagleweb.xyz.scrollscaledemo.BottomView

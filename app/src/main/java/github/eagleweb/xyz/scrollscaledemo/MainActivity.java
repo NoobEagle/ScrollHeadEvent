@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -37,10 +38,59 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
                 ViewHolder vh = (ViewHolder) holder;
-                vh.mItemView.setOnClickListener(new View.OnClickListener() {
+//                vh.mItemView.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Toast.makeText(MainActivity.this, "点击了：" + position, Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+                vh.mItemView.setOnTouchListener(new View.OnTouchListener() {
+                    public boolean isUp;
+                    public float dX;
+                    public float dY;
+                    public long dTime;
+
                     @Override
-                    public void onClick(View v) {
-                        Toast.makeText(MainActivity.this, "点击了：" + position, Toast.LENGTH_SHORT).show();
+                    public boolean onTouch(View v, final MotionEvent event) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                isUp = false;
+                                dTime = System.currentTimeMillis();
+                                dX = event.getRawX();
+                                dY = event.getRawY();
+                                // 可以做个延时任务，1秒之后还未抬起，并且位置变化不超过5，就视为长按
+                                v.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (!isUp) {
+                                            float rawX = event.getRawX();
+                                            float rawY = event.getRawY();
+                                            //                                            long l = System.currentTimeMillis();
+                                            if (Math.abs(rawX - dX) < 5 && Math.abs(rawY - dY) < 5) {
+                                                Toast.makeText(MainActivity.this, "长按了：" + position, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    }
+                                }, 1000);
+                                break;
+                            case MotionEvent.ACTION_UP:
+                            case MotionEvent.ACTION_CANCEL:
+                                isUp = true;
+                                float rawX = event.getRawX();
+                                float rawY = event.getRawY();
+                                long l = System.currentTimeMillis();
+                                if (Math.abs(rawX - dX) < 5 && Math.abs(rawY - dY) < 5 && (l - dTime) < 300 && (l - dTime) > 10) {
+                                    // 点击事件
+                                    Toast.makeText(MainActivity.this, "点击了：" + position, Toast.LENGTH_SHORT).show();
+                                } else if (Math.abs(rawX - dX) < 5 && Math.abs(rawY - dY) < 5 && (l - dTime) < 1000) {
+                                    //                                    Toast.makeText(MainActivity.this, "长按了：" + position, Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        float rawX = event.getRawX();
+                        return false;
                     }
                 });
                 vh.text.setText("Fake Item " + (position + 1));

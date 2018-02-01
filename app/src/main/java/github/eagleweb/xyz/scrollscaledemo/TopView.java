@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -27,7 +28,8 @@ public class TopView extends RelativeLayout {
     private ValueAnimator mHideAnimator;
     private ValueAnimator mShowAnimator;
     private boolean isOpen    = true; // 是否是展示状态
-    private int     mDuration = 100;
+    private int     mDuration = 130;
+    private OnToggleListener mListener;
 
     public TopView(Context context) {
         this(context, null);
@@ -39,7 +41,7 @@ public class TopView extends RelativeLayout {
 
     public TopView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        sourceHeight = getResources().getDimension(R.dimen.top_height);
+        sourceHeight = getResources().getDimension(R.dimen.index_top_height);
     }
 
     public void setBootomView(BottomView bootomView) {
@@ -87,14 +89,14 @@ public class TopView extends RelativeLayout {
                     }
                 } else {
                     // 上滑
-                    if (!isOpen()) {
-                        return false;
-                    }
+                    //                    if (!isOpen()) {
+                    //                        return false;
+                    //                    }
                 }
                 // 如果Y差值大于100，并且时间小于800，则视为快速滑动，直接给他收起
                 if ((Math.abs(translationY2) > 10 && (l < 800)) || Math.abs(translationY2) > (sourceHeight / 1.3)) {
                     // 执行滑动动画收起
-                    isOpen = false;
+                    setOpen(false);
                     mHideAnimator = ValueAnimator.ofInt(getHeight(), 0);
                     mHideAnimator.setDuration(mDuration);
                     mHideAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -106,7 +108,7 @@ public class TopView extends RelativeLayout {
                     mHideAnimator.start();
                 } else {
                     // 执行滑动动画展开
-                    isOpen = true;
+                    setOpen(true);
                     mShowAnimator = ValueAnimator.ofInt(getHeight(), (int) sourceHeight);
                     mShowAnimator.setDuration(mDuration);
                     mShowAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -131,6 +133,26 @@ public class TopView extends RelativeLayout {
 
     public void setOpen(boolean open) {
         isOpen = open;
+        if (mListener != null) {
+            mListener.toggle(isOpen);
+        }
+    }
+
+
+    @Override
+    public void setLayoutParams(ViewGroup.LayoutParams params) {
+        if (params.height > sourceHeight) {
+            params.height = (int) sourceHeight;
+        }
+        if (params.height < 0) {
+            params.height = 0;
+        }
+        float v = params.height / sourceHeight;
+        setScaleX((v));
+        setScaleY((v));
+        setAlpha(v);
+        Log.d(TAG, "what？ 缩放：" + v);
+        super.setLayoutParams(params);
     }
 
     @Override
@@ -141,5 +163,14 @@ public class TopView extends RelativeLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return super.dispatchTouchEvent(ev);
+    }
+
+    public interface OnToggleListener {
+        void toggle(boolean open);
+    }
+
+    public void setToggleListener(OnToggleListener listener) {
+
+        mListener = listener;
     }
 }
